@@ -8,7 +8,6 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.util.stream.Collectors;
 
-
 @Component
 public class SimpleProtocol {
 
