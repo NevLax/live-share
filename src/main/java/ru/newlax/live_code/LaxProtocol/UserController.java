@@ -1,13 +1,13 @@
 package ru.newlax.live_code.LaxProtocol;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.*;
 
-@Component
+@Repository
 public class UserController {
 
     private final Map<String, List<WebSocketSession>> listeners = Collections.synchronizedMap(new HashMap<>());
@@ -42,15 +42,25 @@ public class UserController {
 
     public String getLastMessage(String name) { return lastMessages.get(name); }
 
-    public void removeUser(WebSocketSession session) {
-        if (listeners.containsValue(session)) {
-            for (String name : listeners.keySet()) {
-                if (listeners.get(name).contains(session)) {
-                    listeners.get(name).remove(session);
-                    break;
-                }
+    public void closeConnection(WebSocketSession session) {
+        if (listeners.containsValue(session)) { removeListener(session); }
+        if (streamers.containsKey(session)) { removeStreamer(session); }
+    }
+
+    private void removeListener(WebSocketSession session) {
+        for (String name : listeners.keySet()) {
+            if (listeners.get(name).contains(session)) {
+                listeners.get(name).remove(session);
+                break;
             }
         }
+    }
+
+    private void removeStreamer(WebSocketSession session) {
+        TextMessage CLOSE = new TextMessage("CLOSE");
+        broadcast(session, CLOSE);
+        listeners.remove(getStreamerName(session));
+        streamers.remove(session);
     }
 
     public void broadcast(WebSocketSession streamer, TextMessage message) {
