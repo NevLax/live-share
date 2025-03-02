@@ -4,6 +4,8 @@ public enum Handles {
     STREAMER("STREAMER"),
     LISTENER("LISTENER"),
     MESSAGE("MESSAGE"),
+    ADD_LINE("ADD_LINE"),
+    REMOVE_LINE("REMOVE_LINE"),
     EDIT("EDIT");
 
     private final String value;

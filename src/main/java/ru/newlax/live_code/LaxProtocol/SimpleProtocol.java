@@ -1,53 +1,36 @@
 package ru.newlax.live_code.LaxProtocol;
 
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.stream.Collectors;
+import java.util.Arrays;
 
 @Component
 public class SimpleProtocol {
 
-    @Autowired
-    private UserController userController;
+    private final HandlerController handlerController;
 
-    private void broadcast(WebSocketSession session, String message) {
+    public SimpleProtocol(HandlerController handlerController) {
+        this.handlerController = handlerController;
     }
-    
+
     public void processMessage(WebSocketSession session, TextMessage message) {
-        Handles handle = getHandle(message);
-
-        switch (handle) {
-            case STREAMER -> userController.addStreamer(getName(message), session);
-            case LISTENER -> userController.addListener(getName(message), session);
-            case MESSAGE -> userController.setLastMessage(session, getMessage(message));
-            case EDIT -> System.out.println("Edit handler");
-        }
+        Handles handle = Handles.valueOf(getHandle(message.getPayload()));
+        handlerController.processHandler(session, handle, message.getPayload());
     }
 
-    private Handles getHandle(TextMessage message) {
-        return Handles.fromString(getFirstLine(message)[0]);
+    public void closeConnection(WebSocketSession session) {
+        handlerController.closeConnection(session);
     }
 
-    private String getName(TextMessage message) {
-        return getFirstLine(message)[1];
-    }
-
-    private String getMessage(TextMessage message) {
-        return message.getPayload()
-                .lines()
-                .skip(1)
-                .collect(Collectors.joining("\n"));
-    }
-
-    private String[] getFirstLine(TextMessage message) {
-        return message.getPayload()
-                .lines()
+    private String getHandle(String message) {
+        return Arrays.stream(
+                message.lines()
                 .findFirst()
                 .orElse("")
-                .split(" ");
+                .split(" "))
+                .findFirst()
+                .orElse("OTHER");
     }
 }

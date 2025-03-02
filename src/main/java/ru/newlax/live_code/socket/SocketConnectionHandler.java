@@ -13,12 +13,10 @@ import ru.newlax.live_code.LaxProtocol.UserController;
 @Component
 public class SocketConnectionHandler extends TextWebSocketHandler {
 
-    private UserController userController;
-    private SimpleProtocol protocol;
+    SimpleProtocol protocol;
 
     @Autowired
-    public SocketConnectionHandler(UserController userController, SimpleProtocol simpleProtocol) {
-        this.userController = userController;
+    public SocketConnectionHandler(SimpleProtocol simpleProtocol) {
         this.protocol = simpleProtocol;
     }
 
@@ -30,7 +28,7 @@ public class SocketConnectionHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
-        userController.closeConnection(session);
+        protocol.closeConnection(session);
     }
 
     @Override

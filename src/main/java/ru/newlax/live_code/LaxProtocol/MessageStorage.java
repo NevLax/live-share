@@ -1,35 +1,49 @@
 package ru.newlax.live_code.LaxProtocol;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+@Repository
 public class MessageStorage {
 
-    List<String> scopeLines = new ArrayList<>();
+    private final Map<String, LinesScope> messageStorage = Collections.synchronizedMap(new HashMap<>());
 
-    public MessageStorage(String text) {
-        scopeLines.addAll(List.of(
-                text.split("\n")
-        ));
+    public void removeLine(String name, int index) {
+        messageStorage.get(name).removeLine(index);
     }
 
-    public void addLine() {
-        this.addLine("");
+    public void addLine(String name) {
+        messageStorage.get(name).addLine("");
     }
 
-    public void addLine(String message) {
-        scopeLines.add(message);
+    public void addLine(String name, String line) {
+        messageStorage.get(name).addLine(line);
     }
 
-    public void insertLine(int index, String line) {
-        scopeLines.add(index, line);
+    public void insertLine(String name, int index) {
+        messageStorage.get(name).insertLine(index, "");
     }
 
-    public void removeLine(int index) {
-        scopeLines.remove(index);
+    public void insertLine(String name, int index, String line) {
+        messageStorage.get(name).insertLine(index, line);
     }
 
-    public String getAllText() {
-        return String.join("", scopeLines);
+    public void editLine(String name, int index, String line) {
+        messageStorage.get(name).editLine(index, line);
+    }
+
+    public void initScope(String name) {
+        messageStorage.put(name, new LinesScope());
+    }
+
+    public void initScope(String name, String text) {
+        messageStorage.put(name, new LinesScope(text));
+    }
+
+    public void remove(String name) {
+        messageStorage.remove(name);
     }
 }
